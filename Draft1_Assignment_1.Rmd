@@ -1,0 +1,41 @@
+---
+title: "Assignment 1"
+author: "Ronaldo Braga"
+date: "Wednesday, February 11, 2015"
+output: html_document
+---
+
+This is the Assignment 1 from Reproducible Research Course (Coursera) 
+
+```{r}
+library(knitr)
+opts_chunk$set(echo = TRUE, results = 'hold')
+
+library(data.table)
+library(ggplot2)
+library(plyr) 
+
+represdata <- read.csv('activity.csv', header = TRUE, sep = ",",
+                       colClasses=c("numeric", "character", "numeric"))
+
+represdata$date <- as.Date(represdata$date, format = "%Y-%m-%d")
+represdata$interval <- as.factor(represdata$interval)
+# Checking the data using str() method:
+str(rdata)
+
+steps_per_day <- aggregate(steps ~ date, represdata, sum)
+colnames(steps_per_day) <- c("date","steps")
+head(steps_per_day)
+
+ggplot(steps_per_day, aes(x = steps)) + 
+  geom_histogram(fill = "green", binwidth = 1000) + 
+  labs(title="Histogram of Steps Taken per Day", 
+       x = "Number of Steps per Day", y = "Number of times in a day(Count)") + theme_bw() 
+
+steps_mean   <- mean(steps_per_day$steps, na.rm=TRUE)
+steps_median <- median(steps_per_day$steps, na.rm=TRUE)
+
+
+
+```
+
