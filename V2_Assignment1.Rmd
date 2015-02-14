@@ -1,0 +1,83 @@
+---
+title: "Assignment1"
+author: "Ronaldo Braga"
+date: "Saturday, February 14, 2015"
+output: html_document
+---
+
+This is the Assignment 1 ref. Reproducible Research Course (Coursera). 
+
+**Preparing the R Environment**
+
+```{r}
+library(knitr)
+opts_chunk$set(echo = TRUE, results = 'hold')
+library(data.table)
+library(ggplot2)
+
+```
+
+__Loading the data__
+
+
+```{r}
+represdata <- read.csv('activity.csv', header = TRUE, sep = ",",
+                  colClasses=c("numeric", "character", "numeric"))
+
+represdata$date <- as.Date(represdata$date, format = "%Y-%m-%d")
+represdata$interval <- as.factor(represdata$interval)
+
+```
+
+__Checking the data__
+
+```{r}
+str(represdata)
+```
+
+**What is mean total number of steps taken per day?**
+
+```{r}
+steps_by_day <- aggregate(steps ~ date, represdata, sum)
+hist(steps_by_day$steps, main = paste("Total Steps Each Day"), col="green", xlab="Number of Steps")
+rmean <- mean(steps_by_day$steps)
+rmedian <- median(steps_by_day$steps)
+
+```
+
+**What is the average daily activity pattern?**
+
+```{r}
+
+spi <- aggregate(represdata$steps, 
+                                by = list(interval = represdata$interval),
+                                FUN=mean, na.rm=TRUE)
+#convert to integers
+##this helps in plotting
+spi$interval <- 
+        as.integer(levels(spi$interval)[spi$interval])
+colnames(spi) <- c("interval", "steps")
+
+ggplot(spi, aes(x=interval, y=steps)) +   
+        geom_line(color="green", size=2) +  
+        labs(title="Average Daily Activity Pattern", x="Interval", y="Number of steps") +  
+        theme_bw()
+
+
+```
+
+**Counting missing values**
+
+Total number of missing values in steps can be calculated using is.na() 
+```{r}
+missing_vals <- sum(is.na(represdata$steps))
+missing_vals
+```
+
+The total number of  missing values are 2304.
+
+
+````
+
+**Are there differences in activity patterns between weekdays and weekends?**
+
