@@ -1,0 +1,76 @@
+---
+title: "Assignment 1_Reproducible Research Course_Coursera"
+author: "Ronaldo Braga"
+date: "Wednesday, February 11, 2015"
+output: html_document
+---
+
+This is the Assignment 1 from Reproducible Research Course from Coursera.
+
+```{r}
+library(knitr)
+opts_chunk$set(echo = TRUE, results = 'hold')
+
+library(data.table)
+library(ggplot2)
+library(plyr) 
+
+represdata <- read.csv('activity.csv', header = TRUE, sep = ",",
+                       colClasses=c("numeric", "character", "numeric"))
+
+represdata$date <- as.Date(represdata$date, format = "%Y-%m-%d")
+represdata$interval <- as.factor(represdata$interval)
+# Checking the data using str() method:
+str(rdata)
+
+steps_per_day <- aggregate(steps ~ date, represdata, sum)
+colnames(steps_per_day) <- c("date","steps")
+head(steps_per_day)
+
+ggplot(steps_per_day, aes(x = steps)) + 
+  geom_histogram(fill = "green", binwidth = 1000) + 
+  labs(title="Histogram of Steps Taken per Day", 
+       x = "Number of Steps per Day", y = "Number of times in a day(Count)") + theme_bw() 
+
+steps_mean   <- mean(steps_per_day$steps, na.rm=TRUE)
+steps_median <- median(steps_per_day$steps, na.rm=TRUE)
+
+
+
+```
+**What is the average daily activity pattern?**
+
+```{r}
+
+spi <- aggregate(represdata$steps, 
+                                by = list(interval = represdata$interval),
+                                FUN=mean, na.rm=TRUE)
+spi$interval <- 
+        as.integer(levels(spi$interval)[spi$interval])
+colnames(spi) <- c("interval", "steps")
+
+ggplot(spi, aes(x=interval, y=steps)) +   
+        geom_line(color="green", size=2) +  
+        labs(title="Average Daily Activity Pattern", x="Interval", y="Number of steps") +  
+        theme_bw()
+
+
+```
+
+**Counting missing values**
+
+Total number of missing values in steps can be calculated using is.na() 
+```{r}
+missing_vals <- sum(is.na(represdata$steps))
+missing_vals
+```
+
+The total number of  missing values are 2304.
+
+
+**Are there differences in activity patterns between weekdays and weekends?**
+
+```{r}
+
+
+```
