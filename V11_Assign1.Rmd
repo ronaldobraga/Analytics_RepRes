@@ -1,0 +1,110 @@
+---
+title: "Assignment 1_Reproducible Research Course_Coursera"
+author: "Ronaldo Braga"
+date: "Wednesday, February 11, 2015"
+output: html_document
+---
+
+This is the Assignment 1 from Reproducible Research Course from Coursera.
+
+**Configuring the Environmemt**
+
+```{r}
+library(knitr)
+opts_chunk$set(echo = TRUE, results = 'hold')
+
+library(data.table)
+library(ggplot2)
+library(plyr) 
+library(xtable)
+library(VIM)
+
+```
+
+**Loading the Data**
+
+
+```{r}
+
+represdata <- read.csv('activity.csv', header = TRUE, sep = ",",
+                       colClasses=c("numeric", "character", "numeric"))
+
+represdata$date <- as.Date(represdata$date, format = "%Y-%m-%d")
+represdata$interval <- as.factor(represdata$interval)
+# Checking the data using str() method:
+str(rdata)
+
+steps_per_day <- aggregate(steps ~ date, represdata, sum)
+colnames(steps_per_day) <- c("date","steps")
+head(steps_per_day)
+```
+
+**The Histogram**
+
+```{r}
+ggplot(steps_per_day, aes(x = steps)) + 
+  geom_histogram(fill = "green", binwidth = 1000) + 
+  labs(title="Histogram of Steps Taken per Day", 
+       x = "Number of Steps per Day", y = "Number of times in a day(Count)") + theme_bw() 
+
+steps_mean   <- mean(steps_per_day$steps, na.rm=TRUE)
+steps_median <- median(steps_per_day$steps, na.rm=TRUE)
+
+```
+
+**What is the average daily activity pattern?**
+
+```{r}
+
+spi <- aggregate(represdata$steps, 
+                                by = list(interval = represdata$interval),
+                                FUN=mean, na.rm=TRUE)
+spi$interval <- 
+        as.integer(levels(spi$interval)[spi$interval])
+colnames(spi) <- c("interval", "steps")
+
+ggplot(spi, aes(x=interval, y=steps)) +   
+        geom_line(color="green", size=2) +  
+        labs(title="Average Daily Activity Pattern", x="Interval", y="Number of steps") +  
+        theme_bw()
+
+
+```
+
+**Counting missing values**
+
+Total number of missing values in steps can be calculated using is.na() 
+```{r}
+missing_vals <- sum(is.na(represdata$steps))
+missing_vals
+```
+
+The total number of  missing values are 2304.
+
+
+**Are there differences in activity patterns between weekdays and weekends?**
+
+```{r}
+
+day <- function(date){
+    if (weekdays(as.Date(date)) %in% c("Saturday", "Sunday")) {
+        "weekend"
+    } else {
+        "weekday"
+    }
+}
+
+#creating day column
+represdata$day <- as.factor(sapply(represdata$date, day))
+
+
+#time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
+
+par(mfrow = c(2, 1))
+for (dayType in c("weekday", "weekend")) {
+    stepType <- aggregate(steps ~ interval, data = represdata, subset = represdata$day == 
+        dayType, FUN = mean)
+    plot(stepType, type='l', main = dayType)
+}
+
+```
